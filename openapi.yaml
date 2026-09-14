@@ -1,0 +1,417 @@
+openapi: 3.0.3
+info:
+  title: CurbCache
+  version: 0.1.0
+  description: >-
+    Edge information system for intelligent IoV: cache, offload, perception, and HD mapping.
+  x-product-slug: ai-iot-curbcache
+  x-source: ai-in-iot/Mobile Edge Intelligence and Computing for the Internet of Vehicles/
+servers:
+  - url: https://api.example.com
+tags:
+  - name: Sites
+  - name: Vehicles
+  - name: Cache
+  - name: Tasks
+  - name: Maps
+paths:
+  /v1/sites:
+    get:
+      operationId: listEdgeSites
+      tags: [Sites]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses:
+        "200":
+          description: Sites
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeEdgeSite" }
+    post:
+      operationId: registerEdgeSite
+      tags: [Sites]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EdgeSiteCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeEdgeSite" }
+  /v1/vehicles:
+    get:
+      operationId: listVehicles
+      tags: [Vehicles]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses:
+        "200":
+          description: Vehicles
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeVehicle" }
+    post:
+      operationId: registerVehicle
+      tags: [Vehicles]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VehicleCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeVehicle" }
+  /v1/vehicles/{vehicleId}/sessions:
+    parameters: [{ name: vehicleId, in: path, required: true, schema: { type: string } }]
+    post:
+      operationId: startVehicleSession
+      tags: [Vehicles]
+      security: [{ ApiKeyAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VehicleSessionCreate" }
+      responses:
+        "201":
+          description: Session started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeVehicleSession" }
+  /v1/cache-objects:
+    get:
+      operationId: listCacheObjects
+      tags: [Cache]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses:
+        "200":
+          description: Cache
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeCacheObject" }
+    post:
+      operationId: putCacheObject
+      tags: [Cache]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CacheObjectCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeCacheObject" }
+  /v1/tasks:
+    get:
+      operationId: listOffloadTasks
+      tags: [Tasks]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses:
+        "200":
+          description: Tasks
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeOffloadTask" }
+    post:
+      operationId: createOffloadTask
+      tags: [Tasks]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OffloadTaskCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeOffloadTask" }
+  /v1/map-tiles:
+    get:
+      operationId: listMapTiles
+      tags: [Maps]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses:
+        "200":
+          description: Maps
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeMapTile" }
+    post:
+      operationId: submitMapTile
+      tags: [Maps]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MapTileCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeMapTile" }
+  /v1/map-tiles/{tileId}/commit:
+    parameters: [{ name: tileId, in: path, required: true, schema: { type: string } }]
+    post:
+      operationId: commitMapTile
+      tags: [Maps]
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Committed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeMapTile" }
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+  schemas:
+    ResponseMeta:
+      type: object
+      required: [requestId, timestamp]
+      properties:
+        requestId: { type: string }
+        timestamp: { type: string, format: date-time }
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+
+    EdgeSite:
+      type: object
+      required: [id, name, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        location: { type: string }
+        computeTops: { type: number }
+        status: { type: string, enum: [online, offline, degraded] }
+    EdgeSiteCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        location: { type: string }
+        computeTops: { type: number }
+    Vehicle:
+      type: object
+      required: [id, oemFleetId, status]
+      properties:
+        id: { type: string }
+        oemFleetId: { type: string }
+        status: { type: string, enum: [registered, active, offline] }
+    VehicleCreate:
+      type: object
+      required: [oemFleetId]
+      properties:
+        oemFleetId: { type: string }
+    VehicleSession:
+      type: object
+      required: [id, vehicleId, role, siteId]
+      properties:
+        id: { type: string }
+        vehicleId: { type: string }
+        siteId: { type: string }
+        role: { type: string, enum: [VaaC, VaaS] }
+        fallbackProfileId: { type: string }
+    VehicleSessionCreate:
+      type: object
+      required: [siteId, role]
+      properties:
+        siteId: { type: string }
+        role: { type: string, enum: [VaaC, VaaS] }
+        fallbackProfileId: { type: string }
+    CacheObject:
+      type: object
+      required: [id, kind, key, freshnessSlaSec]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [map_tile, model_feature, content] }
+        key: { type: string }
+        siteId: { type: string }
+        freshnessSlaSec: { type: integer }
+        bytes: { type: integer }
+    CacheObjectCreate:
+      type: object
+      required: [kind, key, freshnessSlaSec]
+      properties:
+        kind: { type: string, enum: [map_tile, model_feature, content] }
+        key: { type: string }
+        siteId: { type: string }
+        freshnessSlaSec: { type: integer }
+        bytes: { type: integer }
+    OffloadTask:
+      type: object
+      required: [id, vehicleId, latencyClass, status]
+      properties:
+        id: { type: string }
+        vehicleId: { type: string }
+        siteId: { type: string }
+        taskType: { type: string, enum: [perception, localization, mapping, other] }
+        latencyClass: { type: string, enum: [hard_100ms, soft, best_effort] }
+        status: { type: string, enum: [queued, running, done, failed, fallback] }
+        latencyMs: { type: integer }
+    OffloadTaskCreate:
+      type: object
+      required: [vehicleId, taskType, latencyClass]
+      properties:
+        vehicleId: { type: string }
+        siteId: { type: string }
+        taskType: { type: string, enum: [perception, localization, mapping, other] }
+        latencyClass: { type: string, enum: [hard_100ms, soft, best_effort] }
+    MapTile:
+      type: object
+      required: [id, tileKey, qualityScore, status]
+      properties:
+        id: { type: string }
+        tileKey: { type: string }
+        contributorVehicleId: { type: string }
+        qualityScore: { type: number }
+        status: { type: string, enum: [submitted, committed, rejected] }
+    MapTileCreate:
+      type: object
+      required: [tileKey, contributorVehicleId]
+      properties:
+        tileKey: { type: string }
+        contributorVehicleId: { type: string }
+        qualityScore: { type: number }
+    DataEnvelopeEdgeSite:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/EdgeSite" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeEdgeSite:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items: { type: array, items: { $ref: "#/components/schemas/EdgeSite" } }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    DataEnvelopeVehicle:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/Vehicle" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeVehicle:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items: { type: array, items: { $ref: "#/components/schemas/Vehicle" } }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    DataEnvelopeVehicleSession:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/VehicleSession" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeVehicleSession:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items: { type: array, items: { $ref: "#/components/schemas/VehicleSession" } }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    DataEnvelopeCacheObject:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/CacheObject" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeCacheObject:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items: { type: array, items: { $ref: "#/components/schemas/CacheObject" } }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    DataEnvelopeOffloadTask:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/OffloadTask" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeOffloadTask:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items: { type: array, items: { $ref: "#/components/schemas/OffloadTask" } }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    DataEnvelopeMapTile:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/MapTile" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeMapTile:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items: { type: array, items: { $ref: "#/components/schemas/MapTile" } }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
